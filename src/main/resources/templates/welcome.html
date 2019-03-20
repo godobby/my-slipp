@@ -5,8 +5,22 @@
 <title>Welcome (View)</title>
 </head>
 <body>
-{{name}}, Hello World!</br>
-{{name}}, Hi!</br>
-age : {{age}}</br>
+
+Hello {{name}}</br></br>
+You have just won {{value}} dollars!</br>
+{{#in_ca}}
+Well, {{taxed_value}} dollars, after taxes.
+{{/in_ca}}
+</br>
+</br>
+* {{name}}</br>
+* {{company}}</br>
+* {{{company}}}</br>
+</br>
+{{#repo}}
+<b>{{name}}</b></br>
+{{/repo}}
+
+
 </body>
 </html>
