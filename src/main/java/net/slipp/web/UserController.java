@@ -3,30 +3,61 @@ package net.slipp.web;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import net.slipp.domain.User;
+import net.slipp.domain.UserRepository;
 
 @Controller
+@RequestMapping("/users")
 public class UserController {
 	
 	private List<User> users = new ArrayList<User>();
 	
-	@PostMapping("/create")//post方式
+	@Autowired
+	private UserRepository userRepository;
+	
+	@GetMapping("/form")
+	public String form( ) {
+		return "/user/form";
+	}
+	
+	// 유저 생성(회원가입)
+	//@PostMapping("/create")//post方式
+	@PostMapping("")//post方式
 	public String create(User user) {
 		
 		System.out.println("user : " + user);
-		users.add(user);
-		return "redirect:/userList";
+		//users.add(user);
+		userRepository.save(user); // UserRepository라는 인터페이스(API)를 통해서 데이터를 DB에 저장
+		//return "redirect:/userList";
+		return "redirect:/users";
 	}
 	
-	@GetMapping("/userList")
+	// 유저리스트 조회
+	//@GetMapping("/userList")
+	@GetMapping("")
 	public String userList(Model model) {
-		model.addAttribute("users", users);
-		return "userList";
+		//model.addAttribute("users", users);// List에 들어있는걸 가져옴
+		model.addAttribute("users", userRepository.findAll()); // UserRepository 인터페이스(API)에 들어있는걸 가져옴
+		return "/user/list";
+	}
+	
+	// 유저 개인정보 수정
+	@GetMapping("/{id}/form")
+	public String updateForm(@PathVariable Long id, Model model) {
+		// id로 DB에서 검색한 해당 사용자 정보를 Model에 담아서 updateForm.html파일에 보내주기
+		User user = userRepository.findById(id).get();
+		model.addAttribute("user", user);
+		//model.addAttribute("user", userRepository.findById(id));
+
+		return "/user/updateForm";
 	}
 
 }
