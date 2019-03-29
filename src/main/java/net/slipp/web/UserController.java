@@ -18,7 +18,7 @@ import net.slipp.domain.User;
 import net.slipp.domain.UserRepository;
 
 @Controller
-@RequestMapping("/users")
+@RequestMapping("/users") // 유저관련 기능을 대표로 나타내는 url을 RequestMapping어노테이션을 이용해 지정
 public class UserController {
 
 	private List<User> users = new ArrayList<User>(); // DB를 사용하기 전 데이터를 일시적으로 담아둔 리스트
