@@ -12,7 +12,7 @@ public class User {
 	@GeneratedValue // 自動で1ずつ増加するように（sequency）
 	private Long id;
 	
-	@Column(nullable=false, length=20)//null値が入れないように
+	@Column(nullable=false, length=20, unique=true)//null値が入れないように
 	private String userId; //primary key
 	private String password;
 	private String name;
