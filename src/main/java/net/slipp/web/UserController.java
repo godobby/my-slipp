@@ -43,21 +43,26 @@ public class UserController {
 			System.out.println("Login Failure!");
 			return "redirect:/users/loginForm";
 		}
-
-		if (!password.equals(user.getPassword())) {
+		
+		if (!user.matchPassword(password)) {
 			System.out.println("Login Failure!");
 			return "redirect:/users/loginForm";
 		}
 
+//		if (!password.equals(user.getPassword())) {
+//			System.out.println("Login Failure!");
+//			return "redirect:/users/loginForm";
+//		}
+
 		System.out.println("Login Success!");
-		session.setAttribute("sessionUser", user);
+		session.setAttribute(HttpSessionUtils.USER_SESSION_KEY, user);
 
 		return "redirect:/";
 	}
 	
 	@GetMapping("/logout")
 	public String logout(HttpSession session) {
-		session.removeAttribute("sessionUser"); // session에 담긴 로그인 정보를 불러와서 removeAttribute함
+		session.removeAttribute(HttpSessionUtils.USER_SESSION_KEY); // session에 담긴 로그인 정보를 불러와서 removeAttribute함
 		return "redirect:/";
 	}
 	
@@ -86,18 +91,23 @@ public class UserController {
 	// 유저 개인정보 수정화면
 	@GetMapping("/{id}/form")
 	public String updateForm(@PathVariable Long id, Model model, HttpSession session) {
-		Object tempUser = session.getAttribute("sessionUser");
-		if (tempUser == null) {
+		if (!HttpSessionUtils.isLoginUser(session)) {
 			return "redirect:/users/loginForm";
 		}
 		
-		// 세션정보랑 일치하는 유저만 수정 가능하게하는방법 1
-		User sessionedUser = (User)tempUser; // Object타입의 tempUser세션정보를 User타입으로 캐스팅
-		if (!id.equals(sessionedUser.getId())) {
-			throw new IllegalStateException("自分の情報のみ修正できます。");
-		}
+//		Object tempUser = session.getAttribute(HttpSessionUtils.USER_SESSION_KEY);
+//		if (tempUser == null) {
+//			return "redirect:/users/loginForm";
+//		}
 		
+		// 세션정보랑 일치하는 유저만 수정 가능하게하는방법 1
+//		User sessionedUser = (User)tempUser; // Object타입의 tempUser세션정보를 User타입으로 캐스팅
+		User sessionedUser = HttpSessionUtils.getUserFromSession(session);
+		if (!sessionedUser.matchId(id)) {
+			throw new IllegalStateException("自分の情報のみ修正できます。");
+		}	
 		// 세션정보랑 일치하는 유저만 수정 가능하게하는 방법 2 => User user = userRepository.findById(sessionedUser.getId()).get();
+
 		// id로 DB에서 검색한 해당 사용자 정보를 Model에 담아서 updateForm.html파일에 보내주기
 		User user = userRepository.findById(id).get();
 		model.addAttribute("user", user);
@@ -109,11 +119,14 @@ public class UserController {
 	// 유저 개인정보 수정
 	@PostMapping("/{id}")
 	public String update(@PathVariable Long id, User updatedUser, HttpSession session) {
-		User sessionedUser = (User)session.getAttribute("sessionUser");
-		if (id.equals(sessionedUser.getId())) {
+		//		User sessionedUser = (User)session.getAttribute("sessionUser");
+		User sessionedUser = HttpSessionUtils.getUserFromSession(session);
+		if (!sessionedUser.matchId(id)) {
 			throw new IllegalStateException("自分の情報のみ修正できます。");
 		}
-		
+//		if (!id.equals(sessionedUser.getId())) {
+//			throw new IllegalStateException("自分の情報のみ修正できます。");
+//		}
 		User user = userRepository.findById(id).get();
 		user.update(updatedUser);
 		userRepository.save(user);
